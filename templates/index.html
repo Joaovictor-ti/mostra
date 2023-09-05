@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Editor de Código Python</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.63.1/codemirror.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.63.1/theme/dracula.min.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.63.1/codemirror.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.63.1/mode/python/python.min.js"></script>
+</head>
+<body>
+    <div id="editorContainer" style="display: none;">
+        <textarea id="editor"></textarea>
+        <button id="btnExecutar">Executar</button>
+    </div>
+    <button id="btnJogar">Jogar</button>
+    <div id="resultado"></div>
+
+    <style>
+        body {
+            background-color: #1e1e1e;
+            color: #d4d4d4;
+            margin: 0;
+        }
+    
+        #btnJogar, #btnExecutar {
+            background-color: #007acc;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+    
+        #editorContainer {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start; /* Ajuste para alinhar o texto à esquerda */
+            text-align: left; /* Ajuste para alinhar o texto à esquerda */
+            margin-top: 20px;
+            padding: 20px;
+        }
+    
+        #editor {
+            width: 100%;
+            height: 60vh;
+        }
+    
+        #resultado {
+            margin-top: 20px;
+            background-color: #333;
+            color: #fff;
+            padding: 10px;
+            border-radius: 5px;
+            white-space: pre-wrap; /* Para manter a formatação de quebra de linha */
+        }
+    </style>
+    
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            var editor = CodeMirror.fromTextArea(document.getElementById("editor"), {
+                mode: "python",
+                theme: "dracula",
+                lineNumbers: true,
+                extraKeys: { "Ctrl-Space": "autocomplete" } // Ativa a sugestão de código
+            });
+
+            document.getElementById("btnJogar").addEventListener("click", function () {
+                document.getElementById("editorContainer").style.display = "block";
+                editor.refresh(); // Corrige o problema de exibição do editor
+            });
+
+            document.getElementById("btnExecutar").addEventListener("click", function () {
+                var codigoPython = editor.getValue();
+                
+                fetch("/executar", {
+                    method: "POST",
+                    body: new URLSearchParams({ codigo: codigoPython }),
+                    headers: {
+                        "Content-Type": "application/x-www-form-urlencoded"
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById("resultado").innerHTML = "<pre>" + data.resultado + "</pre>";
+                })
+                .catch(error => {
+                    document.getElementById("resultado").innerHTML = "<pre>Erro de execução:\n" + error + "</pre>";
+                });
+            });
+        });
+    </script>
+</body>
+</html>
+
