@@ -5,7 +5,7 @@ import subprocess
 import tempfile
 import os
 
-app = Flask(__name__, template_folder='templates')  # Defina o diretório de modelos como 'templates'
+app = Flask(__name__, template_folder='templates')
 
 @app.route('/')
 def index():
@@ -24,13 +24,14 @@ def executar_codigo():
         # Execute o código Python a partir do arquivo temporário
         resultado = subprocess.check_output(['python', nome_arquivo], stderr=subprocess.STDOUT, text=True)
 
-        return jsonify({'resultado': resultado, 'erro': None})
+        return jsonify({'resultado': resultado.strip(), 'erro': None})
     except subprocess.CalledProcessError as e:
-        return jsonify({'resultado': None, 'erro': e.output})
+        return jsonify({'resultado': e.output.strip(), 'erro': str(e)})
+    except Exception as e:
+        return jsonify({'resultado': None, 'erro': str(e)})
     finally:
         # Limpe o arquivo temporário
         os.remove(nome_arquivo)
 
 if __name__ == '__main__':
     app.run(debug=True)
-

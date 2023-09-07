@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Editor de Código Python</title>
+    <!-- Inclua os recursos necessários, como CodeMirror e jQuery -->
+</head>
+<body>
+    <div id="editorContainer">
+        <!-- Use um editor de código, como o CodeMirror, para que os usuários possam digitar código Python -->
+        <textarea id="editor"></textarea>
+        <button id="btnExecutar">Executar</button>
+    </div>
+    <div id="resultado"></div>
+
+    <style>
+        body {
+            background-color: #1e1e1e;
+            color: #d4d4d4;
+            margin: 0;
+        }
+    
+        #btnExecutar {
+            background-color: #007acc;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+    
+        #editorContainer {
+            display: none;
+            margin-top: 20px;
+            padding: 20px;
+        }
+    
+        #editor {
+            width: 100%;
+            height: 60vh;
+        }
+    
+        #resultado {
+            margin-top: 20px;
+            background-color: #333;
+            color: #fff;
+            padding: 10px;
+            border-radius: 5px;
+            white-space: pre-wrap;
+        }
+    </style>
+    
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            var editor = CodeMirror.fromTextArea(document.getElementById("editor"), {
+                mode: "python",
+                theme: "dracula",
+                lineNumbers: true,
+                extraKeys: { "Ctrl-Space": "autocomplete" }
+            });
+
+            document.getElementById("btnExecutar").addEventListener("click", function () {
+                var codigoPython = editor.getValue();
+                var token = 'seu_token_aqui'; // Substitua pelo seu token
+                var username = 'seu_username_aqui'; // Substitua pelo seu nome de usuário
+                
+                // Faça uma chamada à API para executar o código Python
+                fetch(`https://www.pythonanywhere.com/api/v0/user/${username}/run/`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Token ${token}`,
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        code: codigoPython,
+                        stdin: '', // Entrada padrão vazia
+                    }),
+                })
+                .then(response => response.json())
+                .then(data => {
+                    // Exiba o resultado da execução
+                    document.getElementById("resultado").textContent = data.stdout;
+                })
+                .catch(error => {
+                    // Em caso de erro na chamada à API
+                    document.getElementById("resultado").textContent = `Erro: ${error.message}`;
+                });
+            });
+
+            // Exibe o editor quando o botão "Jogar" é clicado
+            document.getElementById("btnJogar").addEventListener("click", function () {
+                document.getElementById("editorContainer").style.display = "block";
+                editor.refresh(); // Corrige o problema de exibição do editor
+            });
+        });
+    </script>
+</body>
+</html>
